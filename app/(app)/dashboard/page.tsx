@@ -2,17 +2,7 @@ import { Role } from "@prisma/client";
 import {PageHeader, SectionTitle} from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/data";
-import { AtGlance } from "./(components)/at-glance";
-import { TodaysJobs } from "./(components)/todays-jobs";
-import { UpcomingJobs } from "./(components)/upcoming-jobs";
-import { PoolsOverview } from "./(components)/pools-overview";
-import { RecentSubLogs } from "./(components)/recent-sub-logs";
-import { TechnicianWorkloads } from "./(components)/technician-workload";
-import { ActiveAlerts } from "./(components)/active-alerts";
-import { RecentServiceLogs } from "./(components)/recent-service";
-import { RecentChemLogs } from "./(components)/recent-chemical";
-import { CustomerUpdateActivity } from "./(components)/customer-updates";
-import { RecentIncidents } from "./(components)/recent-incidents";
+import { AtGlance, TodaysJobs, UpcomingJobs, PoolsOverview, RecentSubLogs, TechnicianWorkloads, ActiveAlerts, RecentServiceLogs, RecentChemLogs, CustomerUpdateActivity, RecentIncidents } from "./(components)";
 
 export default async function DashboardPage() {
   const user = await requireUser();
