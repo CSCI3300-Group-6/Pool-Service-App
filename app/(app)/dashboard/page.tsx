@@ -4,12 +4,15 @@ import { requireUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/data";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { AtGlance } from "./(components)/at-glance";
+import { TodaysJobs } from "./(components)/todays-jobs";
+import { UpcomingJobs } from "./(components)/upcoming-jobs";
+import { PoolsOverview } from "./(components)/pools-overview";
 
 export default async function DashboardPage() {
   const user = await requireUser();
   const data: any = await getDashboardData(user.organizationId, user.role, user.id);
-
-  if (user.role === Role.TECHNICIAN) {
+  const isTechnician = user.role === Role.TECHNICIAN
+  if ( isTechnician ) {
     return (
       <div className="space-y-6">
         <PageHeader title="Technician Dashboard" description="Today’s route, upcoming jobs, and your recent submitted work." />
@@ -19,40 +22,9 @@ export default async function DashboardPage() {
           <StatCard label="Upcoming jobs" value={data.upcomingJobs.length} />
           <StatCard label="Recent logs" value={data.recentLogs.length} />
         </div>
-        <Card>
-          <SectionTitle>Today&apos;s assigned jobs</SectionTitle>
-          {data.todayJobs.length === 0 ? <EmptyState title="No jobs today" description="Your route is clear right now." /> : (
-            <div className="space-y-3">
-              {data.todayJobs.map((job: any) => (
-                <div key={job.id} className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">{job.pool.name}</p>
-                      <p className="text-sm text-slate-600">{job.pool.customer.name} · {job.pool.customer.address}</p>
-                    </div>
-                    <div className="text-sm text-slate-500">{formatDateTime(job.scheduledStart)}</div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <StatusBadge label={job.status} tone={job.status === "COMPLETED" ? "success" : "info"} />
-                    <a href={`/jobs/${job.id}`} className="text-sm font-medium">Open job</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
+        <TodaysJobs data={data}></TodaysJobs>
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <SectionTitle>Upcoming jobs</SectionTitle>
-            <div className="space-y-3">
-              {data.upcomingJobs.map((job: any) => (
-                <div key={job.id} className="rounded-xl border border-slate-200 p-4">
-                  <p className="font-medium text-slate-900">{job.pool.name}</p>
-                  <p className="text-sm text-slate-600">{formatDateTime(job.scheduledStart)}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <UpcomingJobs data={data} isTechnician={isTechnician}/>
           <Card>
             <SectionTitle>Recent submitted logs</SectionTitle>
             <div className="space-y-3">
@@ -79,7 +51,6 @@ export default async function DashboardPage() {
         description={isOwner ? "Scheduling, customer growth, technician load, and customer communication in one view." : "Chemistry oversight, alerts, incidents, and reporting readiness across all pools."}
       />
       <AtGlance user={user} data={data} isOwner={isOwner}></AtGlance>
-      
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Upcoming jobs" value={data.upcomingJobs.length} />
         <StatCard label="Active alerts" value={data.activeAlerts.length} detail={isOwner ? "Visibility into chemistry issues" : "Inspection focus"} />
@@ -88,35 +59,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
-        <Card>
-          <SectionTitle>{isOwner ? "Upcoming jobs" : "All pools overview"}</SectionTitle>
-          <div className="space-y-3">
-            {(isOwner ? data.upcomingJobs : data.pools).map((item: any) => (
-              "scheduledStart" in item ? (
-                <div key={item.id} className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">{item.pool.name}</p>
-                      <p className="text-sm text-slate-600">{item.pool.customer.name} · {item.technician?.name ?? "Unassigned"}</p>
-                    </div>
-                    <div className="text-sm text-slate-500">{formatDateTime(item.scheduledStart)}</div>
-                  </div>
-                </div>
-              ) : (
-                <div key={item.id} className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">{item.name}</p>
-                      <p className="text-sm text-slate-600">{item.customer.name} · {item.poolType}</p>
-                    </div>
-                    <StatusBadge label={`${item.alerts.length} alerts`} tone={item.alerts.length ? "danger" : "success"} />
-                  </div>
-                </div>
-              )
-            ))}
-          </div>
-        </Card>
-
+        {isOwner ? <UpcomingJobs data={data} isTechnician={isTechnician}/> : <PoolsOverview data={data}/>}
         <Card>
           <SectionTitle>{isOwner ? "Technician workload" : "Active alerts"}</SectionTitle>
           <div className="space-y-3">

@@ -10,8 +10,7 @@ interface AtGlanceProps {
 
 export function AtGlance({user, data, isOwner}: AtGlanceProps) {
     if (user.role === Role.TECHNICIAN ) {
-      return <>
-        <Card className="overflow-hidden border-sky-100 bg-[linear-gradient(180deg,#ffffff,#f5f9fc)]">
+      return <Card className="overflow-hidden border-sky-100 bg-[linear-gradient(180deg,#ffffff,#f5f9fc)]">
             <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
               <div>
                 <p className="text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-sky-700/70">Today on deck</p>
@@ -35,12 +34,10 @@ export function AtGlance({user, data, isOwner}: AtGlanceProps) {
                 </div>
               </div>
             </div>
-          </Card>
-      </>;
+        </Card>;
     }
     else{
-        return <>
-            <Card className="overflow-hidden border-sky-100 bg-[linear-gradient(180deg,#ffffff,#f5f9fc)]">
+        return <Card className="overflow-hidden border-sky-100 bg-[linear-gradient(180deg,#ffffff,#f5f9fc)]">
               <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
                 <div>
                   <p className="text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-sky-700/70">
@@ -73,5 +70,5 @@ export function AtGlance({user, data, isOwner}: AtGlanceProps) {
                 </div>
               </div>
           </Card>
-    </>}
+          }
 }
