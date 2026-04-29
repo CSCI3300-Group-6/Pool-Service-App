@@ -15,10 +15,10 @@ export default async function DashboardPage() {
         <Card className="overflow-hidden border-sky-100 bg-[linear-gradient(180deg,#ffffff,#f5f9fc)]">
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-sky-700/70"></p>
-              <h2 className="font-display mt-3 text-3xl font-bold tracking-tight text-slate-950">Summary</h2>
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-sky-700/70">Today on deck</p>
+              <h2 className="font-display mt-3 text-3xl font-bold tracking-tight text-slate-950">Stay ahead of the route and keep every stop inspection-ready.</h2>
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
-
+                Your dashboard is tuned for field work: assigned jobs, recent logs, and the next visits that need attention.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
