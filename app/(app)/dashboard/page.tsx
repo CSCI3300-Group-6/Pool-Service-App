@@ -3,6 +3,7 @@ import { Card, EmptyState, PageHeader, SectionTitle, StatCard, StatusBadge } fro
 import { requireUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/data";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { AtGlance } from "./(components)/at-glance";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -12,31 +13,7 @@ export default async function DashboardPage() {
     return (
       <div className="space-y-6">
         <PageHeader title="Technician Dashboard" description="Today’s route, upcoming jobs, and your recent submitted work." />
-        <Card className="overflow-hidden border-sky-100 bg-[linear-gradient(180deg,#ffffff,#f5f9fc)]">
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <div>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-sky-700/70">Today on deck</p>
-              <h2 className="font-display mt-3 text-3xl font-bold tracking-tight text-slate-950">Stay ahead of the route and keep every stop inspection-ready.</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
-                Your dashboard is tuned for field work: assigned jobs, recent logs, and the next visits that need attention.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-              <div className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-[0.7rem] uppercase tracking-[0.2em] text-slate-500">Jobs today</p>
-                <p className="font-display mt-2 text-4xl font-bold text-slate-950">{data.todayJobs.length}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-[0.7rem] uppercase tracking-[0.2em] text-slate-500">Upcoming</p>
-                <p className="font-display mt-2 text-4xl font-bold text-slate-950">{data.upcomingJobs.length}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-[0.7rem] uppercase tracking-[0.2em] text-slate-500">Recent logs</p>
-                <p className="font-display mt-2 text-4xl font-bold text-slate-950">{data.recentLogs.length}</p>
-              </div>
-            </div>
-          </div>
-        </Card>
+        <AtGlance user={user} data={data} ></AtGlance>
         <div className="grid gap-4 md:grid-cols-3">
           <StatCard label="Today's jobs" value={data.todayJobs.length} />
           <StatCard label="Upcoming jobs" value={data.upcomingJobs.length} />
@@ -99,26 +76,13 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <PageHeader
         title={isOwner ? "Owner Dashboard" : "Operations Dashboard"}
-        description={isOwner ? "Scheduling, customer growth, technician load" : "Chemistry oversight, alerts, incidents, and reporting readiness across all pools."}
+        description={isOwner ? "Scheduling, customer growth, technician load, and customer communication in one view." : "Chemistry oversight, alerts, incidents, and reporting readiness across all pools."}
       />
-      <Card className="overflow-hidden border-sky-100 bg-[linear-gradient(180deg,#ffffff,#f5f9fc)]">
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-          
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="text-[0.68rem] uppercase tracking-[0.18em] text-slate-500">{isOwner ? "Upcoming jobs" : "Jobs today"}</p>
-              <p className="font-display mt-2 text-4xl font-bold text-slate-950">{isOwner ? data.upcomingJobs.length : data.todayJobs.length}</p>
-            </div>
-            
-            <div className="rounded-xl border border-slate-200 bg-white p-4 sm:col-span-2">
-              <p className="text-[0.68rem] uppercase tracking-[0.18em] text-slate-500">{isOwner ? "Tracked pools" : "30-day equipment spend"}</p>
-              <p className="font-display mt-2 text-4xl font-bold text-slate-950">{isOwner ? data.pools.length : formatCurrency(data.expenseSnapshot)}</p>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <AtGlance user={user} data={data} isOwner={isOwner}></AtGlance>
+      
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Upcoming jobs" value={data.upcomingJobs.length} />
+        <StatCard label="Active alerts" value={data.activeAlerts.length} detail={isOwner ? "Visibility into chemistry issues" : "Inspection focus"} />
         <StatCard label="Tracked pools" value={data.pools.length} />
         <StatCard label="30-day equipment spend" value={formatCurrency(data.expenseSnapshot)} />
       </div>
@@ -197,7 +161,21 @@ export default async function DashboardPage() {
         <Card>
           <SectionTitle>{isOwner ? "Customer update activity" : "Recent incidents"}</SectionTitle>
           <div className="space-y-3">
-            
+            {(isOwner ? data.recentMessages : data.recentIncidents).map((item: any) => (
+              "subject" in item ? (
+                <div key={item.id} className="rounded-xl border border-slate-200 p-4">
+                  <p className="font-medium text-slate-900">{item.customer.name}</p>
+                  <p className="text-sm text-slate-600">{item.subject}</p>
+                  <p className="mt-1 text-xs text-slate-500">{item.status} · {formatDateTime(item.createdAt)}</p>
+                </div>
+              ) : (
+                <div key={item.id} className="rounded-xl border border-slate-200 p-4">
+                  <p className="font-medium text-slate-900">{item.title}</p>
+                  <p className="text-sm text-slate-600">{item.pool.name} · {item.severity}</p>
+                  <p className="mt-1 text-xs text-slate-500">{item.technician.name} · {formatDateTime(item.createdAt)}</p>
+                </div>
+              )
+            ))}
           </div>
         </Card>
       </div>
