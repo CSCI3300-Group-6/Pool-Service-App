@@ -34,6 +34,12 @@ All demo users use the password `demo1234`.
 cp .env.example .env
 ```
 
+or if using the docker image:
+
+```bash
+cp .env.docker.example .env
+```
+
 2. Install dependencies:
 
 ```bash
@@ -48,6 +54,19 @@ DIRECT_URL="postgresql://..."
 ```
 
 `DATABASE_URL` should be the pooled Neon connection string and `DIRECT_URL` should be the direct connection string for Prisma migrations.
+
+or if you're using the docker image, you must remove line 8 from [schema.prisma](prisma/schema.prisma).
+```
+8 | directUrl = env("DIRECT_URL") [delete this line]
+```
+ run
+```bash
+docker compose up -d
+```
+close the docker image after use with
+```bash
+docker compose down
+```
 
 4. Generate Prisma client and run the database migrations:
 
