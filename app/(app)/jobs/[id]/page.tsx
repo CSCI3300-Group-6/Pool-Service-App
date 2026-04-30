@@ -8,10 +8,12 @@ import { db } from "@/lib/db";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // Pulls the job ID from the URL and verifies the user has access to this job
   const { id } = await params;
   const { user, job } = await ensureJobAccess(id);
   if (!job) notFound();
 
+  // Fetches the 3 most recent service and chemical logs for this pool, excluding the current job
   const [recentHistory, recentChemicals] = await Promise.all([
     db.serviceLog.findMany({
       where: { poolId: job.poolId, jobId: { not: job.id } },
@@ -26,13 +28,17 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
     }),
   ]);
 
+  // Pre-fills the customer update email body using job and service log data
   const defaultUpdateBody = `Hello ${job.pool.customer.name},\n\n${job.technician?.name ?? "Our technician"} completed service on ${new Date(job.scheduledStart).toLocaleDateString()}.\n\nWork performed:\n${job.serviceLog?.summary ?? "Routine pool service completed."}\n\nNotes:\n${job.serviceLog?.observations ?? job.notes ?? "No additional notes."}\n`;
 
   return (
     <div className="space-y-6">
       <PageHeader title={job.title} description={`${job.pool.customer.name} · ${job.pool.name}`} />
+
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
+
+          {/* Visit details card — shows customer, schedule, technician, pool, and status */}
           <Card>
             <SectionTitle>Visit details</SectionTitle>
             <div className="grid gap-4 md:grid-cols-2 text-sm text-slate-700">
@@ -41,6 +47,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
               <p><span className="font-medium text-slate-900">Scheduled:</span> {formatDateTime(job.scheduledStart)}</p>
               <p><span className="font-medium text-slate-900">Technician:</span> {job.technician?.name ?? "Unassigned"}</p>
               <p><span className="font-medium text-slate-900">Pool:</span> {job.pool.poolType}</p>
+              {/* Badge is green if completed, yellow if still pending */}
               <p><span className="font-medium text-slate-900">Status:</span> <StatusBadge label={job.status} tone={job.status === "COMPLETED" ? "success" : "warning"} /></p>
             </div>
             <div className="mt-4 space-y-3 text-sm text-slate-700">
@@ -55,6 +62,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
             </div>
           </Card>
 
+          {/* Loops through recent service and chemical logs for this pool to give context for the visit */}
           <Card>
             <SectionTitle>Recent pool history</SectionTitle>
             <div className="space-y-3">
@@ -75,7 +83,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         </div>
 
         <div className="space-y-6">
+          {/* Technicians see the job execution form, managers see controls and the service log */}
           {user.role === "TECHNICIAN" ? (
+            // Technician view — checklist completion and service log submission
             <TechnicianJobExecution
               jobId={job.id}
               checklistItems={job.checklistItems.map((item) => ({ id: item.id, label: item.label, completed: item.completed, required: item.required }))}
@@ -83,10 +93,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
             />
           ) : (
             <>
+              {/* Manager controls for updating job status */}
               <Card>
                 <SectionTitle>Manager controls</SectionTitle>
                 <JobStatusForm jobId={job.id} currentStatus={job.status} />
               </Card>
+
+              {/* Loops through checklist items and shows whether each one is done or pending */}
               <Card>
                 <SectionTitle>Completed checklist</SectionTitle>
                 <div className="space-y-2">
@@ -98,6 +111,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
                   ))}
                 </div>
               </Card>
+
+              {/* Shows the submitted service log, or a placeholder if none has been submitted yet */}
               <Card>
                 <SectionTitle>Service log</SectionTitle>
                 {job.serviceLog ? (
@@ -107,8 +122,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
                     <p><span className="font-medium text-slate-900">Water level:</span> {job.serviceLog.waterLevelStatus}</p>
                     <p><span className="font-medium text-slate-900">Submitted:</span> {formatDateTime(job.serviceLog.submittedAt)}</p>
                   </div>
-                ) : <p className="text-sm text-slate-500">No service log submitted yet.</p>}
+                ) : (
+                  <p className="text-sm text-slate-500">No service log submitted yet.</p>
+                )}
               </Card>
+
+              {/* Customer update form — pre-filled with job and service log data */}
               <Card>
                 <SectionTitle>Customer update</SectionTitle>
                 <CustomerUpdateForm
