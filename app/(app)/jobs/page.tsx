@@ -4,7 +4,11 @@ import { Button, Card, PageHeader, StatusBadge } from "@/components/ui";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function JobsPage() {
+  // Restricts access to owners and operations managers only
   const user = await requireRole(["OWNER", "OPERATIONS_MANAGER"]);
+
+  // Fetches all jobs for the organization, including related pool, customer, technician, and service log data
+  // Sorted by most recently scheduled first
   const jobs = await db.job.findMany({
     where: { organizationId: user.organizationId },
     include: { pool: { include: { customer: true } }, technician: true, serviceLog: true },
@@ -13,7 +17,10 @@ export default async function JobsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Page header with a button to create a new job */}
       <PageHeader title="Jobs" description="Assignment tracking across all scheduled pool visits." action={<Button href="/jobs/new">New job</Button>} />
+
+      {/* Table displaying all jobs and their details */}
       <Card className="overflow-hidden p-0">
         <table className="min-w-full text-sm">
           <thead className="bg-slate-100 text-left text-slate-600">
@@ -27,17 +34,34 @@ export default async function JobsPage() {
             </tr>
           </thead>
           <tbody>
+            {/* Loops through each job and renders a table row */}
             {jobs.map((job) => (
               <tr key={job.id} className="border-t border-slate-200">
                 <td className="px-4 py-3">
                   <p className="font-medium text-slate-900">{job.title}</p>
                   <p className="text-slate-500">{job.notes || "No notes"}</p>
                 </td>
-                <td className="px-4 py-3">{job.pool.name}<div className="text-slate-500">{job.pool.customer.name}</div></td>
+
+                {/* Pool name and customer name pulled from the nested include */}
+                <td className="px-4 py-3">
+                  {job.pool.name}
+                  <div className="text-slate-500">{job.pool.customer.name}</div>
+                </td>
+
+                {/* Falls back to "Unassigned" if no technician is linked */}
                 <td className="px-4 py-3">{job.technician?.name ?? "Unassigned"}</td>
+
                 <td className="px-4 py-3">{formatDateTime(job.scheduledStart)}</td>
-                <td className="px-4 py-3"><StatusBadge label={job.status} tone={job.serviceLog ? "success" : "warning"} /></td>
-                <td className="px-4 py-3 text-right"><a href={`/jobs/${job.id}`} className="font-medium">Open</a></td>
+
+                {/* Status badge is green if a service log exists, yellow if the job is still pending */}
+                <td className="px-4 py-3">
+                  <StatusBadge label={job.status} tone={job.serviceLog ? "success" : "warning"} />
+                </td>
+
+                {/* Links to the individual job detail page */}
+                <td className="px-4 py-3 text-right">
+                  <a href={`/jobs/${job.id}`} className="font-medium">Open</a>
+                </td>
               </tr>
             ))}
           </tbody>
