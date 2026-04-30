@@ -6,7 +6,8 @@ import { PrintButton } from "@/components/print-button";
 import { Button, Card, PageHeader, SectionTitle, StatusBadge } from "@/components/ui";
 import { formatDateTime } from "@/lib/utils";
 
-function toDateInput(value: Date) {
+// Formats a Date into a yyyy-MM-dd string for HTML date inputs
+function formatDateforInput(value: Date) {
   return value.toISOString().slice(0, 10);
 }
 
@@ -15,37 +16,49 @@ export default async function ComplianceReportPage({
 }: {
   searchParams: Promise<{ start?: string; end?: string; poolIds?: string; reportType?: string }>;
 }) {
+  
+  // Pulls the logged in user and restricts access by role
   const user = await requireRole(["OWNER", "OPERATIONS_MANAGER"]);
+  
+   // Reads filter values from the URL query string
   const params = await searchParams;
-  const start = startOfDay(new Date(params.start || toDateInput(subDays(new Date(), 14))));
-  const end = endOfDay(new Date(params.end || toDateInput(new Date())));
+  const start = startOfDay(new Date(params.start || formatDateforInput(subDays(new Date(), 14))));
+  const end = endOfDay(new Date(params.end || formatDateforInput(new Date())));
   const poolIds = params.poolIds?.split(",").filter(Boolean);
   const reportType = params.reportType || "full";
 
+  // Fetches report data and pool list in parallel
   const [data, pools] = await Promise.all([
     getComplianceReportData({ organizationId: user.organizationId, start, end, poolIds }),
     db.pool.findMany({ where: { organizationId: user.organizationId }, orderBy: { name: "asc" } }),
   ]);
 
-  const exportHref = `/api/reports/compliance?start=${toDateInput(start)}&end=${toDateInput(end)}&poolIds=${poolIds?.join(",") ?? ""}`;
+  // Builds the CSV export URL using the current active filters
+  const exportHref = `/api/reports/compliance?start=${formatDateforInput(start)}&end=${formatDateforInput(end)}&poolIds=${poolIds?.join(",") ?? ""}`;
 
   return (
     <div className="space-y-6">
       <PageHeader title="Compliance report" description="" />
+       
+      {/* Filter form — hidden from print view */}
       <Card className="print-hidden">
         <form className="grid gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Start date</label>
-            <input type="date" name="start" defaultValue={toDateInput(start)} />
+            <input type="date" name="start" defaultValue={formatDateforInput(start)} />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">End date</label>
-            <input type="date" name="end" defaultValue={toDateInput(end)} />
+            <input type="date" name="end" defaultValue={formatDateforInput(end)} />
           </div>
+          
+           {/* Placeholder shows real pool names as an example */}
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Pool IDs (comma separated)</label>
             <input name="poolIds" defaultValue={poolIds?.join(",") ?? ""} placeholder={pools.slice(0, 2).map((pool) => pool.id).join(",")} />
           </div>
+          
+          {/* Controls which sections are rendered below */}
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Report type</label>
             <select name="reportType" defaultValue={reportType}>
@@ -63,6 +76,7 @@ export default async function ComplianceReportPage({
         </form>
       </Card>
 
+       {/* Displays total counts for each log type */}
       <Card>
         <SectionTitle>Report summary</SectionTitle>
         <div className="grid gap-4 md:grid-cols-3">
@@ -72,6 +86,7 @@ export default async function ComplianceReportPage({
         </div>
       </Card>
 
+      {/* Renders service logs if report type includes them */}
       {(reportType === "full" || reportType === "service") && (
         <Card>
           <SectionTitle>Service logs</SectionTitle>
@@ -92,6 +107,7 @@ export default async function ComplianceReportPage({
         </Card>
       )}
 
+      {/* Renders chemical logs if report type includes them */}
       {(reportType === "full" || reportType === "chemicals") && (
         <Card>
           <SectionTitle>Chemical logs</SectionTitle>
@@ -113,6 +129,7 @@ export default async function ComplianceReportPage({
         </Card>
       )}
 
+       {/* Renders incidents if report type includes them */}
       {(reportType === "full" || reportType === "incidents") && (
         <Card>
           <SectionTitle>Incidents</SectionTitle>

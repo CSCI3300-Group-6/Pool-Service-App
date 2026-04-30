@@ -1,5 +1,6 @@
 "use client";
 
+// PrintButton triggers the browser's native prine dialog for report pages
 export function PrintButton() {
   return (
     <button

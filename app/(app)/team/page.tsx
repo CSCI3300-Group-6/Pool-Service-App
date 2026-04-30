@@ -3,7 +3,11 @@ import { db } from "@/lib/db";
 import { Card, PageHeader, StatusBadge } from "@/components/ui";
 
 export default async function TeamPage() {
+  // Only owners can view the team roster
   const user = await requireRole(["OWNER"]);
+
+  // Fetches all members of the organization, including their currently scheduled jobs
+  // Sorted by role first, then alphabetically by name
   const members = await db.user.findMany({
     where: { organizationId: user.organizationId },
     include: { assignedJobs: { where: { status: "SCHEDULED" } } },
@@ -13,7 +17,9 @@ export default async function TeamPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Team" description="Demo roster, roles, and current assigned job load." />
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {/* Loops through each team member and renders a summary card */}
         {members.map((member) => (
           <Card key={member.id}>
             <div className="flex items-start justify-between gap-3">
@@ -21,8 +27,10 @@ export default async function TeamPage() {
                 <p className="font-semibold text-slate-900">{member.name}</p>
                 <p className="text-sm text-slate-600">{member.email}</p>
               </div>
+              {/* Formats the role for display and colors it based on whether they are a technician or manager */}
               <StatusBadge label={member.role.replaceAll("_", " ")} tone={member.role === "TECHNICIAN" ? "info" : "success"} />
             </div>
+            {/* Shows how many jobs are currently scheduled for this team member */}
             <p className="mt-4 text-sm text-slate-600">{member.assignedJobs.length} scheduled jobs</p>
           </Card>
         ))}

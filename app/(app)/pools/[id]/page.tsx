@@ -6,8 +6,14 @@ import { Card, PageHeader, SectionTitle, StatusBadge } from "@/components/ui";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function PoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // Owners and operations managers can view pool details
   const user = await requireRole(["OWNER", "OPERATIONS_MANAGER"]);
+
+  // Pulls the pool ID from the URL
   const { id } = await params;
+
+  // Fetches the pool and the customer list in parallel
+  // Pool includes unresolved alerts, and the 8 most recent service and chemical logs
   const [pool, customers] = await Promise.all([
     db.pool.findUnique({
       where: { id },
@@ -24,15 +30,20 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
       orderBy: { name: "asc" },
     }),
   ]);
+
+  // Redirects to 404 if the pool doesn't exist or belongs to a different organization
   if (!pool || pool.organizationId !== user.organizationId) notFound();
 
   return (
     <div className="space-y-6">
       <PageHeader title={pool.name} description={`${pool.customer.name} · ${pool.poolType}`} />
+
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
+          {/* Owners see an editable form, operations managers see a read only summary */}
           <SectionTitle>{user.role === "OWNER" ? "Edit pool" : "Pool profile"}</SectionTitle>
           {user.role === "OWNER" ? (
+            // Passes existing pool data into the form as default values
             <PoolForm
               customers={customers}
               mode="edit"
@@ -53,30 +64,39 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
               }}
             />
           ) : (
+            // Read only view for operations managers
             <div className="space-y-3 text-sm text-slate-700">
               <p><span className="font-medium text-slate-900">Dimensions:</span> {pool.dimensions}</p>
               <p><span className="font-medium text-slate-900">Volume:</span> {pool.estimatedVolume.toLocaleString()} gal</p>
               <p><span className="font-medium text-slate-900">Care instructions:</span> {pool.careInstructions}</p>
               <p><span className="font-medium text-slate-900">Target pH:</span> {pool.targetPhMin} - {pool.targetPhMax}</p>
-              <p><span className="font-medium text-slate-900">Target chlorine :</span> {pool.targetChlorineMin ?? "N/A"} - {pool.targetChlorineMax ?? "N/A"}</p>
+              <p><span className="font-medium text-slate-900">Target chlorine:</span> {pool.targetChlorineMin ?? "N/A"} - {pool.targetChlorineMax ?? "N/A"}</p>
             </div>
           )}
         </Card>
+
         <div className="space-y-6">
+          {/* Shows only unresolved alerts — displays a placeholder if there are none */}
           <Card>
             <SectionTitle>Active alerts</SectionTitle>
             <div className="space-y-3">
-              {pool.alerts.length === 0 ? <p className="text-sm text-slate-500">No active alerts.</p> : pool.alerts.map((alert) => (
-                <div key={alert.id} className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-medium text-slate-900">{alert.message}</p>
-                    <StatusBadge label={alert.type} tone="danger" />
+              {pool.alerts.length === 0 ? (
+                <p className="text-sm text-slate-500">No active alerts.</p>
+              ) : (
+                pool.alerts.map((alert) => (
+                  <div key={alert.id} className="rounded-xl border border-slate-200 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-medium text-slate-900">{alert.message}</p>
+                      <StatusBadge label={alert.type} tone="danger" />
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500">{formatDateTime(alert.createdAt)}</p>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">{formatDateTime(alert.createdAt)}</p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </Card>
+
+          {/* Loops through the 8 most recent service logs for this pool */}
           <Card>
             <SectionTitle>Recent service history</SectionTitle>
             <div className="space-y-3">
