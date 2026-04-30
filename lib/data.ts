@@ -50,41 +50,48 @@ export async function getDashboardData(organizationId: string, role: Role, userI
     expenseSnapshot,
     pools,
   ] = await Promise.all([
+    //upcoming jobs
     db.job.findMany({
       where: { organizationId, scheduledStart: { gte: todayStart } },
       include: { pool: { include: { customer: true } }, technician: true },
       take: 8,
       orderBy: { scheduledStart: "asc" },
     }),
+    //active alerts
     db.alert.findMany({
       where: { organizationId, resolved: false },
       include: { pool: true },
       take: 6,
       orderBy: { createdAt: "desc" },
     }),
+    //Incident log
     db.incidentLog.findMany({
       where: { organizationId },
       include: { pool: true, technician: true },
       take: 6,
       orderBy: { createdAt: "desc" },
     }),
+    //Chemical readings
     db.chemicalLog.findMany({
       where: { organizationId },
       include: { pool: true, technician: true },
       take: 6,
       orderBy: { loggedAt: "desc" },
     }),
+    //New customers
     db.customer.findMany({
       where: { organizationId },
       take: 5,
       orderBy: { createdAt: "desc" },
     }),
+    //Service logs
     db.serviceLog.findMany({
       where: { organizationId },
       include: { pool: true, technician: true, job: true },
       take: 6,
       orderBy: { submittedAt: "desc" },
     }),
+   //Pool technicians
     db.user.findMany({
       where: { organizationId, role: "TECHNICIAN" },
       include: {
@@ -93,16 +100,19 @@ export async function getDashboardData(organizationId: string, role: Role, userI
         },
       },
     }),
+  //customer messages
     db.customerMessage.findMany({
       where: { organizationId },
       include: { customer: true },
       take: 5,
       orderBy: { createdAt: "desc" },
     }),
+ //Equipment expences
     db.equipmentExpense.aggregate({
       where: { organizationId, incurredAt: { gte: subDays(new Date(), 30) } },
       _sum: { amount: true },
     }),
+  //Pools we've signed
     db.pool.findMany({
       where: { organizationId },
       include: { customer: true, alerts: { where: { resolved: false } } },
