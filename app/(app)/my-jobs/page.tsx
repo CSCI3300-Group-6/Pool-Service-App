@@ -4,7 +4,10 @@ import { Card, PageHeader, StatusBadge } from "@/components/ui";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function MyJobsPage() {
+  // Restricts access to technicians only
   const user = await requireRole(["TECHNICIAN"]);
+
+  // Fetches only the jobs assigned to this technician, sorted by earliest scheduled first
   const jobs = await db.job.findMany({
     where: { organizationId: user.organizationId, technicianId: user.id },
     include: { pool: { include: { customer: true } } },
@@ -14,7 +17,9 @@ export default async function MyJobsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="My jobs" description="Assigned service visits and pool instructions." />
+
       <div className="space-y-4">
+        {/* Loops through each assigned job and renders a card with visit details */}
         {jobs.map((job) => (
           <Card key={job.id}>
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -22,11 +27,14 @@ export default async function MyJobsPage() {
                 <p className="font-semibold text-slate-900">{job.pool.name}</p>
                 <p className="text-sm text-slate-600">{job.pool.customer.name} · {job.pool.customer.address}</p>
               </div>
+              {/* Badge is green if the job is completed, blue if it is still in progress */}
               <StatusBadge label={job.status} tone={job.status === "COMPLETED" ? "success" : "info"} />
             </div>
             <p className="mt-3 text-sm text-slate-600">{formatDateTime(job.scheduledStart)}</p>
             <div className="mt-3 flex items-center justify-between">
+              {/* Shows pool care instructions as a reminder before the technician opens the job */}
               <p className="text-sm text-slate-500">{job.pool.careInstructions}</p>
+              {/* Links to the full job detail and execution page */}
               <a href={`/jobs/${job.id}`} className="text-sm font-medium">Open job</a>
             </div>
           </Card>
