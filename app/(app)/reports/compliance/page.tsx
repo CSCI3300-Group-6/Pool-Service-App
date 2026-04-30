@@ -6,7 +6,7 @@ import { PrintButton } from "@/components/print-button";
 import { Button, Card, PageHeader, SectionTitle, StatusBadge } from "@/components/ui";
 import { formatDateTime } from "@/lib/utils";
 
-function toDateInput(value: Date) {
+function formatDateforInput(value: Date) {
   return value.toISOString().slice(0, 10);
 }
 
@@ -17,8 +17,8 @@ export default async function ComplianceReportPage({
 }) {
   const user = await requireRole(["OWNER", "OPERATIONS_MANAGER"]);
   const params = await searchParams;
-  const start = startOfDay(new Date(params.start || toDateInput(subDays(new Date(), 14))));
-  const end = endOfDay(new Date(params.end || toDateInput(new Date())));
+  const start = startOfDay(new Date(params.start || formatDateforInput(subDays(new Date(), 14))));
+  const end = endOfDay(new Date(params.end || formatDateforInput(new Date())));
   const poolIds = params.poolIds?.split(",").filter(Boolean);
   const reportType = params.reportType || "full";
 
@@ -27,7 +27,7 @@ export default async function ComplianceReportPage({
     db.pool.findMany({ where: { organizationId: user.organizationId }, orderBy: { name: "asc" } }),
   ]);
 
-  const exportHref = `/api/reports/compliance?start=${toDateInput(start)}&end=${toDateInput(end)}&poolIds=${poolIds?.join(",") ?? ""}`;
+  const exportHref = `/api/reports/compliance?start=${formatDateforInput(start)}&end=${formatDateforInput(end)}&poolIds=${poolIds?.join(",") ?? ""}`;
 
   return (
     <div className="space-y-6">
@@ -36,11 +36,11 @@ export default async function ComplianceReportPage({
         <form className="grid gap-4 md:grid-cols-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Start date</label>
-            <input type="date" name="start" defaultValue={toDateInput(start)} />
+            <input type="date" name="start" defaultValue={formatDateforInput(start)} />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">End date</label>
-            <input type="date" name="end" defaultValue={toDateInput(end)} />
+            <input type="date" name="end" defaultValue={formatDateforInput(end)} />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Pool IDs (comma separated)</label>
