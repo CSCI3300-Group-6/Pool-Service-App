@@ -25,18 +25,23 @@ export function SidebarNav({ role }: { role: Role }) {
     <nav className="space-y-2">
       {navItems
         .filter((item) => !item.roles || item.roles.includes(role))
-        .map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "block rounded-lg px-4 py-3 text-sm font-medium text-slate-200 hover:bg-white/6 hover:text-white",
-              pathname === item.href && "bg-white text-slate-950 shadow-[0_10px_24px_rgba(10,16,40,0.18)] hover:bg-white",
-            )}
-          >
-            {item.label}
-          </Link>
-        ))}
+        .map((item) => {
+          const active = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "block rounded-lg px-4 py-3 text-sm font-medium",
+                active
+                  ? "bg-white text-slate-950 shadow-[0_10px_24px_rgba(10,16,40,0.18)] hover:bg-white hover:text-slate-700"
+                  : "text-slate-200 hover:bg-white/6 hover:text-white",
+              )}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
     </nav>
   );
 }

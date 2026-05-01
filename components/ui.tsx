@@ -60,7 +60,7 @@ export function Button({
   type?: "button" | "submit";
 }) {
   const styles = {
-    primary: "bg-[linear-gradient(135deg,#f38d2c,#ea7e22)] text-slate-950 hover:brightness-105",
+    primary: "bg-[linear-gradient(135deg,#10b981,#059669)] text-white hover:brightness-105",
     secondary: "bg-[linear-gradient(135deg,#17234f,#21448a)] text-white hover:brightness-105",
     ghost: "bg-white/70 text-slate-700 hover:bg-white",
     danger: "bg-rose-600 text-white hover:bg-rose-700",
