@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { WaterLevelStatus } from "@prisma/client";
+// Use a local string union for client-side code to avoid bundling Prisma in the browser
+type WaterLevelStatus = "LOW" | "NORMAL" | "HIGH";
+const WATER_LEVELS: WaterLevelStatus[] = ["LOW", "NORMAL", "HIGH"];
 import { useSubmit } from "@/components/forms/use-submit";
 
 type ChecklistItem = { id: string; label: string; completed: boolean; required: boolean };
@@ -31,7 +33,7 @@ export function TechnicianJobExecution({
   const [selectedChecklistIds, setSelectedChecklistIds] = useState<string[]>(checklistItems.filter((item) => item.completed).map((item) => item.id));
   const [summary, setSummary] = useState(defaultSummary ?? "");
   const [observations, setObservations] = useState("");
-  const [waterLevelStatus, setWaterLevelStatus] = useState<WaterLevelStatus>(WaterLevelStatus.NORMAL);
+  const [waterLevelStatus, setWaterLevelStatus] = useState<WaterLevelStatus>("NORMAL");
   const [chemicalEntries, setChemicalEntries] = useState<ChemicalEntry[]>([
     { chemicalType: "Liquid chlorine", dosageAmount: 1, dosageUnit: "gal", costPerUnit: 6.5, phReading: 7.4, chlorineReading: 2.1, alkalinityReading: 100, notes: "" },
   ]);
@@ -74,7 +76,9 @@ export function TechnicianJobExecution({
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Water level status</label>
             <select value={waterLevelStatus} onChange={(event) => setWaterLevelStatus(event.target.value as WaterLevelStatus)}>
-              {Object.values(WaterLevelStatus).map((status) => <option key={status} value={status}>{status}</option>)}
+              {WATER_LEVELS.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
             </select>
           </div>
         </div>
