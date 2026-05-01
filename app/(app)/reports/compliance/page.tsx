@@ -70,7 +70,7 @@ export default async function ComplianceReportPage({
           </div>
           <div className="md:col-span-4 flex flex-wrap gap-3">
             <Button type="submit">Apply filters</Button>
-            <Button variant="ghost">Export CSV</Button>
+            <Button href={exportHref} variant="ghost">Export CSV</Button>
             <PrintButton />
           </div>
         </form>
