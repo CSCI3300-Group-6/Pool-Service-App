@@ -1,8 +1,10 @@
 "use client";
 
-import { JobStatus } from "@prisma/client";
 import { useState } from "react";
 import { useSubmit } from "@/components/forms/use-submit";
+
+type JobStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "MISSED" | "CANCELLED";
+const JOB_STATUSES: JobStatus[] = ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "MISSED", "CANCELLED"];
 
 export function JobStatusForm({ jobId, currentStatus }: { jobId: string; currentStatus: JobStatus }) {
   const [status, setStatus] = useState<JobStatus>(currentStatus);
@@ -13,7 +15,9 @@ export function JobStatusForm({ jobId, currentStatus }: { jobId: string; current
       <label className="block text-sm font-medium text-slate-700">Manager status</label>
       <div className="flex flex-wrap gap-2">
         <select value={status} onChange={(event) => setStatus(event.target.value as JobStatus)} className="max-w-xs">
-          {Object.values(JobStatus).map((value) => <option key={value} value={value}>{value}</option>)}
+          {JOB_STATUSES.map((value) => (
+            <option key={value} value={value}>{value}</option>
+          ))}
         </select>
         <button
           type="button"
