@@ -18,7 +18,6 @@ export default async function LoginPage() {
 
           <ul className="mt-8 grid gap-4 text-sm text-slate-200/90">
             <li>Role-based dashboards for owner, ops manager, and field technician.</li>
-            <li>Hosted PostgreSQL data </li>
           </ul>
         </div>
         <Card className="mx-auto w-full max-w-xl rounded-[1.6rem] p-8 md:p-10">
