@@ -34,10 +34,10 @@ export default async function DashboardPage() {
   // Owners and managers get a full operational dashboard with all components
   return (
     <div className="space-y-6">
-      {/* Page title and description swap between owner and manager versions */}
+      {/* Page title and description */}
       <PageHeader
-        title={isOwner ? "Owner Dashboard" : "Operations Dashboard"}
-        description={isOwner ? "Scheduling, customer growth, technician load, and customer communication in one view." : "Chemistry oversight, alerts, incidents, and reporting readiness across all pools."}
+        title= "Operations Dashboard"
+        description="Scheduling, customer growth, technician load, and customer communication"
       />
       <AtGlance user={user} data={data} isOwner={isOwner} />
 
