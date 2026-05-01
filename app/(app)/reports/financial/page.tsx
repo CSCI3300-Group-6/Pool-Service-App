@@ -70,7 +70,7 @@ export default async function FinancialReportPage({
           <div className="md:col-span-4 flex flex-wrap gap-3">
             <Button type="submit">Apply filters</Button>
             {/* Links to the API route which streams back a CSV file */}
-            
+            <a
               href={exportHref}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >

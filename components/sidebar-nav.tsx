@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Role } from "@prisma/client";
 import { cn } from "@/lib/utils";
+
+type Role = "OWNER" | "OPERATIONS_MANAGER" | "TECHNICIAN";
 
 const navItems: { href: string; label: string; roles?: Role[] }[] = [
   { href: "/dashboard", label: "Dashboard" },

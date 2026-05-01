@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: light;
+  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Trebuchet MS", "Avenir Next Condensed", "Arial Narrow", sans-serif;
   --bg-ocean-deep: #0f123f;
   --bg-ocean-mid: #153a88;
   --bg-pool: #79d8ec;

@@ -1,6 +1,8 @@
 "use client";
 
-import { PoolStatus } from "@prisma/client";
+// Use a local string union for client-side code to avoid bundling Prisma in the browser
+type PoolStatus = "ACTIVE" | "MAINTENANCE" | "INACTIVE";
+const POOL_STATUSES: PoolStatus[] = ["ACTIVE", "MAINTENANCE", "INACTIVE"];
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,7 +23,7 @@ export function PoolForm({
 }) {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(poolSchema),
-    defaultValues: {
+      defaultValues: {
       customerId: pool?.customerId ?? customers[0]?.id ?? "",
       name: pool?.name ?? "",
       poolType: pool?.poolType ?? "",
@@ -33,7 +35,7 @@ export function PoolForm({
       targetChlorineMin: pool?.targetChlorineMin ?? 1,
       targetChlorineMax: pool?.targetChlorineMax ?? 3,
       notes: pool?.notes ?? "",
-      status: pool?.status ?? PoolStatus.ACTIVE,
+        status: pool?.status ?? "ACTIVE",
     },
   });
   const { submit, isPending, error, success } = useSubmit();
@@ -62,7 +64,9 @@ export function PoolForm({
         <Field label="Estimated volume (gal)" error={errors.estimatedVolume?.message}><input type="number" {...register("estimatedVolume")} /></Field>
         <Field label="Status">
           <select {...register("status")}>
-            {Object.values(PoolStatus).map((status) => <option key={status} value={status}>{status}</option>)}
+            {POOL_STATUSES.map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
           </select>
         </Field>
         <Field label="Target pH min" error={errors.targetPhMin?.message}><input type="number" step="0.1" {...register("targetPhMin")} /></Field>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { CustomerForm } from "@/components/forms/customer-form";
-import { Card, PageHeader, SectionTitle, StatusBadge } from "@/components/ui";
+import { Card, PageHeader, SectionTitle } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime } from "@/lib/utils";
@@ -67,3 +67,17 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             <div className="space-y-3">
               {customer.messages.map((message) => (
                 <div key={message.id} className="rounded-xl border border-slate-200 p-4">
+                  <p className="text-sm text-slate-700">{message.body}</p>
+                  <p className="mt-2 text-xs text-slate-500">{formatDateTime(message.createdAt)}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
