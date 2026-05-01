@@ -37,7 +37,7 @@ export default async function DashboardPage() {
       {/* Page title and description swap between owner and manager versions */}
       <PageHeader
         title={isOwner ? "Owner Dashboard" : "Operations Dashboard"}
-        description={isOwner ? "Scheduling, customer growth, technician load, and customer communication in one view." : "Chemistry oversight, alerts, incidents, and reporting readiness across all pools."}
+        description={isOwner ? "Scheduling, customer growth, technician load, and customer communication." : "Chemistry oversight, alerts, incidents, and reporting readiness across all pools."}
       />
       <AtGlance user={user} data={data} isOwner={isOwner} />
 
