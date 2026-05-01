@@ -1,5 +1,7 @@
-import { PoolStatus, WaterLevelStatus } from "@prisma/client";
 import { z } from "zod";
+
+export const POOL_STATUS_VALUES = ["ACTIVE", "MAINTENANCE", "INACTIVE"] as const;
+export const WATER_LEVEL_STATUS_VALUES = ["LOW", "NORMAL", "HIGH"] as const;
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -26,7 +28,7 @@ export const poolSchema = z.object({
   targetChlorineMin: z.union([z.coerce.number().min(0), z.nan()]).optional(),
   targetChlorineMax: z.union([z.coerce.number().min(0), z.nan()]).optional(),
   notes: z.string().optional(),
-  status: z.nativeEnum(PoolStatus),
+  status: z.enum(POOL_STATUS_VALUES),
 });
 
 export const jobSchema = z.object({
@@ -52,7 +54,7 @@ export const checklistTemplateSchema = z.object({
 export const serviceLogSchema = z.object({
   summary: z.string().min(5),
   observations: z.string().min(5),
-  waterLevelStatus: z.nativeEnum(WaterLevelStatus),
+  waterLevelStatus: z.enum(WATER_LEVEL_STATUS_VALUES),
 });
 
 export const chemicalLogSchema = z.object({
