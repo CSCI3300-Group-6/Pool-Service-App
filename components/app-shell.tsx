@@ -16,7 +16,7 @@ export function AppShell({
   return (
     <div className="app-wave-bg min-h-screen">
       <div className="grid min-h-screen lg:grid-cols-[290px_1fr]">
-        <aside className="relative border-b border-white/10 bg-[#17285d] px-5 py-6 text-white lg:border-b-0 lg:border-r lg:border-white/10">
+        <aside className="relative border-b border-white/10 bg-[#17285d] px-5 py-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 print-hidden">
           <div className="mb-8 rounded-[1.1rem] border border-white/10 bg-white/4 p-5 shadow-[0_16px_34px_rgba(4,8,28,0.18)]">
             <p className="text-[0.68rem] uppercase tracking-[0.28em] text-sky-100/70">Pool Service App</p>
             <h1 className="font-display mt-3 text-[1.4rem] font-bold leading-tight"></h1>
