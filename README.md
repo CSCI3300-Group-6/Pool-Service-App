@@ -1,8 +1,11 @@
 # PSA
+Hosted on vercel at: https://pool-service-app.vercel.app/login
 
 A pool service management platform built with Next.js App Router, TypeScript, Tailwind CSS, Prisma, PostgreSQL, Zod, React Hook Form, and date-fns.
 This project was made using nextjs.org/learn and templates/formatting from vercel.com/templates. 
-It is designed for a software engineering course demo and supports:
+
+
+It supports:
 
 - Role-based authentication
 - Customer and pool management
